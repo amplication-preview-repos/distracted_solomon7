@@ -1,0 +1,105 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ItemType {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String?
+  items     Item[]
+}
+
+model Item {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  available  Boolean?
+  name       String?
+  location   Location? @relation(fields: [locationId], references: [id])
+  locationId String?
+  rentals    Rental[]
+  itemType   ItemType? @relation(fields: [itemTypeId], references: [id])
+  itemTypeId String?
+  reviews    Review[]
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String?
+  address   String?
+  items     Item[]
+}
+
+model Rental {
+  id         String    @id @default(cuid())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  rentDate   DateTime?
+  returnDate DateTime?
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+  item       Item?     @relation(fields: [itemId], references: [id])
+  itemId     String?
+  orders     Order[]
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  rating    Int?
+  comment   String?
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  item      Item?    @relation(fields: [itemId], references: [id])
+  itemId    String?
+}
+
+model Order {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  orderDate DateTime?
+  status    String?
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+  rental    Rental?   @relation(fields: [rentalId], references: [id])
+  rentalId  String?
+  payments  Payment[]
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  paymentDate   DateTime?
+  amount        Float?
+  paymentStatus String?
+  order         Order?    @relation(fields: [orderId], references: [id])
+  orderId       String?
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  firstName String?
+  lastName  String?
+  username  String   @unique
+  email     String?  @unique
+  password  String
+  roles     Json
+  userType  String?
+  name      String?
+  rentals   Rental[]
+  orders    Order[]
+  reviews   Review[]
+}
